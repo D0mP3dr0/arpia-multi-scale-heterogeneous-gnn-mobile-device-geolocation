@@ -1,0 +1,36 @@
+input_files:
+  peaid_erbid: "${ARPIA_ROOT}/DATA_ENRICHED/ALVO/PEAID_ERBID.csv"
+  erb_cps: "${ARPIA_ROOT}/DATA_ENRICHED/ANTENAS_ERB/erb_cps.csv"
+
+output_files:
+  erb_cps_ctc_ctnc: "${ARPIA_ROOT}/DATA_ENRICHED/ANTENAS_ERB/erb_cps_ctc_ctnc.csv"
+  triangulation_summary: "${ARPIA_ROOT}/DATA_ENRICHED/ANTENAS_ERB/triangulation_summary.csv"
+
+expected_columns:
+  peaid_erbid:
+    - "erb_id"
+    - "pea_lat"
+    - "pea_lon"
+    - "SetorID RE"
+  erb_cps:
+    - "cps_id"
+    - "erb_id"
+    - "lat_centroide"
+    - "lon_centroide"
+    - "lat_erb"
+    - "lon_erb"
+
+triangulation:
+  centroid_method: "geometric"
+
+  min_triangle_area: 0.000001
+  max_triangle_area: 1.0
+
+  connection_types:
+    - "CTC"
+    - "CTNC"
+
+hardware:
+  use_parallel: true
+  max_workers: 8
+  chunk_size: 10000

@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+message: >-
+  If you use the code in this repository, please cite the article listed under
+  preferred-citation.
+type: software
+title: >-
+  ARPIA: A multi-scale heterogeneous graph neural network for mobile device
+  geolocation with explicit non-connection modeling (code)
+abstract: >-
+  Code of the article "ARPIA: A multi-scale heterogeneous graph neural network
+  for mobile device geolocation with explicit non-connection modeling"
+  (Ad Hoc Networks, 2026). It holds the data preparation (target enrichment,
+  triangulation and edge generation), the normalization, the construction of
+  the heterogeneous graph, the training code of ARPIA and of the GATv2, HAN and
+  RGCN variants, the ablation and sensitivity scripts, the classical
+  localization baselines and the computational cost measurement.
+authors:
+  - given-names: Luis Felipe Comodo
+    family-names: Seelig
+    orcid: "https://orcid.org/0009-0000-6095-3864"
+    affiliation: >-
+      Postgraduate Program in Defense Engineering (PGED), Military Institute
+      of Engineering (IME), Rio de Janeiro, Brazil
+  - given-names: Ronaldo Moreira
+    family-names: Salles
+    email: rmo@estg.ipp.pt
+    affiliation: >-
+      Postgraduate Program in Defense Engineering (PGED), Military Institute
+      of Engineering (IME), Rio de Janeiro, Brazil; Center for Innovation and
+      Research in Business Sciences and Information Systems (CIICESI), ESTG,
+      Polytechnic of Porto, Portugal
+
+repository-code: "https://github.com/D0mP3dr0/arpia-multi-scale-heterogeneous-gnn-mobile-device-geolocation"
+license: MIT
+keywords:
+  - graph neural networks
+  - mobile device localization
+  - physics-informed learning
+  - heterogeneous graphs
+  - non-connection modeling
+  - multi-scale architecture
+  - HeteroGAT
+  - ablation analysis
+preferred-citation:
+  type: article
+  title: >-
+    ARPIA: A multi-scale heterogeneous graph neural network for mobile device
+    geolocation with explicit non-connection modeling
+  authors:
+    - given-names: Luis Felipe Comodo
+      family-names: Seelig
+      orcid: "https://orcid.org/0009-0000-6095-3864"
+    - given-names: Ronaldo Moreira
+      family-names: Salles
+  journal: Ad Hoc Networks
+  volume: 189
+  start: 104263
+  year: 2026
+  doi: 10.1016/j.adhoc.2026.104263
+  url: "https://doi.org/10.1016/j.adhoc.2026.104263"

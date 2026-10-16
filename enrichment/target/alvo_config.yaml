@@ -1,0 +1,47 @@
+input_gprs_gpkg:
+  path: "${ARPIA_V2_ROOT}/DATA_PROCESSED/OBJETO/dados_erb_harmonizados__localizacoes_erb.csv"
+  layer_name: ""
+  map_columns:
+    erb_ref_latitude: "latitude"
+    erb_ref_longitude: "longitude"
+    gprs_azimute: "azimute_graus"
+    gprs_raio_metros: "raio_cobertura_metros"
+    gprs_timestamp: "timestamp_completo"
+    gprs_duracao: "duracao_segundos"
+    gprs_operadora_definition:
+      source_type: "FIXED"
+      fixed_value: "${ARPIA_OPERATOR}"
+
+input_antenas_gpkg:
+  path: "${ARPIA_V2_ROOT}/DATA_ENRICHED/ANTENAS_ERB/ANTENAS_ERB_PONTOS.csv"
+  layer_name: ""
+  operadora_column_in_antenas: "operadora"
+  id_column_in_antenas: "erb_id"
+
+output_pea_gpkg:
+  path: "${ARPIA_V2_ROOT}/DATA_ENRICHED/ALVO/dados_pea_enriquecidos.csv"
+  layer_name: "dados_pea_enriquecidos"
+  format: "CSV"
+
+antenna_matching:
+  max_distance_meters: 1000
+  priority_1_label: "MESMA_OPERADORA"
+  priority_2_label: "MAIS_PROXIMA"
+  no_match_label: "SEM_MATCH"
+
+pea_feature_names:
+  pea_id: "pea_id"
+  erb_id: "erb_id"
+  pea_lat: "pea_lat"
+  pea_lon: "pea_lon"
+  timestamp: "timestamp"
+  raio_origem: "raio_origem"
+  azimute_origem: "azimute_origem"
+  duracao_conexao: "duracao_conexao"
+  tipo_match_antena: "tipo_match_antena"
+  operadora_evento_gprs: "operadora_evento_gprs"
+  operadora_antena_escolhida: "operadora_antena_escolhida"
+  distancia_antena_metros: "distancia_antena_metros"
+
+input_crs_fallback: "EPSG:4326"
+output_crs: "EPSG:4326"

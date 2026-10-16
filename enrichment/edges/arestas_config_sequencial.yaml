@@ -1,0 +1,183 @@
+input_files:
+  triangulacao: "${ARPIA_ROOT}/DATA_ENRICHED/ANTENAS_ERB/erb_cps_ctc_ctnc.csv"
+  conexoes_pea_erb: "${ARPIA_ROOT}/DATA_ENRICHED/ALVO/PEAID_ERBID.csv"
+
+output_dir: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES"
+
+output_files:
+  edges_conexao_pea_erb: "edges_conexao_pea_erb.csv"
+  edges_nao_conexao: "edges_nao_conexao.csv"
+  edges_intra_triangulo_conexao: "edges_intra_triangulo_conexao.csv"
+  edges_intra_triangulo_nao_conexao: "edges_intra_triangulo_nao_conexao.csv"
+  edges_pea_pea: "edges_pea_pea.csv"
+  edges_erb_erb: "edges_erb_erb.csv"
+  edges_cps_cps: "edges_cps_cps.csv"
+  edges_ctc_ctc: "edges_ctc_ctc.csv"
+  edges_ctnc_ctnc: "edges_ctnc_ctnc.csv"
+
+processing:
+  parallel_workers: 1
+  chunk_size: 50000
+  use_multiprocessing: false
+
+  quality_filters:
+    filter_zero_distances: false
+    min_distance_threshold: 0.001
+
+    remove_duplicates: false
+    duplicate_tolerance: 0.01
+
+    max_connections_per_pea: 1000
+
+    remove_outliers: false
+    outlier_std_threshold: 3.0
+
+  geographic_clustering:
+    enable_clustering: false
+    cluster_distance_threshold: 0.1
+    cluster_method: "dbscan"
+    min_samples: 2
+
+  max_distances:
+    pea_pea: 2.0
+    erb_erb: 5.0
+    cps_cps: 3.0
+    ctc_ctc: 2.0
+    ctnc_ctnc: 2.5
+
+  max_edges:
+    pea_pea: 5000000
+    erb_erb: 1000000
+    cps_cps: 5000000
+    ctc_ctc: 10000000
+    ctnc_ctnc: 20000000
+
+edge_types:
+  basic_connections: true
+  non_connections: true
+  intra_triangle: true
+  same_type_nodes: true
+  triangulation_nodes: true
+
+edge_config:
+  conexao_pea_erb:
+    include_distance: true
+    include_azimuth: true
+    include_operadora: true
+    include_tecnologia: true
+    min_distance_m: 1.0
+    max_distance_m: 10000.0
+
+  nao_conexao:
+    max_distance_km: 5.0
+    include_fator_punitivo: true
+    max_per_pea: 100
+    remove_high_duplicates: true
+    duplicate_threshold: 0.8
+
+  intra_triangulo:
+    bidirectional: true
+    include_triangle_id: true
+    validate_geometry: true
+
+  same_type:
+    bidirectional: true
+    include_distance: true
+    include_similarity_flags: true
+    smart_sampling: true
+    sampling_strategy: "distance_based"
+
+quality_monitoring:
+  enable_monitoring: false
+
+  metrics:
+    duplicate_rate_threshold: 0.1
+    zero_distance_threshold: 0.05
+    outlier_rate_threshold: 0.05
+
+  alerts:
+    enable_alerts: true
+    alert_file: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/quality_alerts.json"
+
+  quality_reports:
+    enable_reports: true
+    report_file: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/quality_report.json"
+
+fator_punitivo:
+  operadora_diferente: 5.0
+  mesma_operadora: 2.0
+  base_distance: 1.0
+  zero_distance_penalty: 100.0
+  duplicate_penalty: 50.0
+
+validation:
+  check_id_consistency: true
+  check_duplicate_edges: true
+  check_node_references: true
+  check_distance_validity: true
+  check_geometric_consistency: true
+  check_data_distribution: true
+
+  min_edges_expected:
+    conexao_pea_erb: 1000
+    nao_conexao: 50000
+    intra_triangulo_conexao: 50000
+    intra_triangulo_nao_conexao: 500000
+
+logging:
+  level: "INFO"
+  log_file: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/arestas_pipeline_sequencial.log"
+  log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  save_stats: true
+  stats_file: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/arestas_stats_sequencial.json"
+  quality_log: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/quality_log.json"
+  performance_log: "${ARPIA_ROOT}/DATA_ENRICHED/ARESTAS/performance_log.json"
+
+hardware:
+  use_numba: true
+  use_vectorization: true
+  memory_chunk_size: 25000
+  optimize_memory: true
+  cache_calculations: true
+  memory_limit_gb: 8
+  auto_cleanup: true
+
+coordinates:
+  earth_radius_km: 6371.0
+  coordinate_precision: 6
+  normalize_coordinates: true
+
+metadata:
+  version: "3.1_sequencial_otimizado"
+  project: "ARPIA_V3"
+  description: "Optimized SEQUENTIAL pipeline with EDA improvements - quality and performance"
+  author: "ARPIA Team"
+  date_created: "2025-01-09"
+  optimization_level: "SEQUENCIAL_OTIMIZADO_V3"
+
+  improvements:
+    - "Quality filters are implemented"
+    - "Connection limits per PEA node"
+    - "Geographic clustering for PEA-PEA edges"
+    - "Improved removal of duplicate edges"
+    - "Continuous metrics of the quality"
+    - "System of automatic alerts"
+    - "Validação geométrica"
+    - "Otimização de memória"
+
+performance:
+  target_cpu_usage: 25
+  target_memory_usage: 60
+  prioritize_completeness: false
+
+  numba_parallel_threshold: 1000
+  numba_fastmath: true
+  numba_cache: true
+
+  process_pool_size: 1
+  thread_pool_size: 1
+  shared_memory: false
+
+  quality_over_quantity: true
+  adaptive_chunking: true
+  progressive_filtering: true

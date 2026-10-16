@@ -1,0 +1,253 @@
+project:
+  name: "ARPIA - PEA Localization System with GNN V3"
+  version: "3.0"
+  description: "V3 heterogeneous graph with expanded modelling of non-connections"
+
+paths:
+  input:
+    base_dir: "${ARPIA_ROOT}/NORMALIZACAO_OUTPUT"
+    nodes:
+      pea: "nodes_pea_v3.parquet"
+      erb: "nodes_erb_v3.parquet"
+      cps: "nodes_cps_v3.parquet"
+      ctc: "nodes_ctc_v3.parquet"
+      ctnc: "nodes_ctnc_v3.parquet"
+    edges:
+      conexao_pea_erb: "edges_conexao_pea_erb_v3.parquet"
+      nao_conexao: "edges_nao_conexao_v3.parquet"
+      pea_pea: "edges_pea_pea_v3.parquet"
+      erb_erb: "edges_erb_erb_v3.parquet"
+      cps_cps: "edges_cps_cps_v3.parquet"
+      ctc_ctc: "edges_ctc_ctc_v3.parquet"
+      ctnc_ctnc: "edges_ctnc_ctnc_v3.parquet"
+      intra_triangulo_conexao: "edges_intra_triangulo_conexao_v3.parquet"
+      intra_triangulo_nao_conexao: "edges_intra_triangulo_nao_conexao_v3.parquet"
+  output:
+    base_dir: "${ARPIA_ROOT}/GRAFO_OUTPUT"
+    graph_file: "arpia_hetero_graph_v3.pt"
+    metadata_file: "graph_metadata_v3.json"
+    id_mapping_file: "id_mapping_v3.json"
+
+graph_schema:
+  node_types:
+    - "PEA"
+    - "ERB"
+    - "CPS"
+    - "CTC"
+    - "CTNC"
+
+  canonical_edge_types:
+    - ["PEA", "CONEXAO", "ERB"]
+    - ["PEA", "NAO_CONEXAO", "ERB"]
+
+    - ["PEA", "PROXIMIDADE", "PEA"]
+    - ["ERB", "PROXIMIDADE", "ERB"]
+    - ["CPS", "PROXIMIDADE", "CPS"]
+    - ["CTC", "PROXIMIDADE", "CTC"]
+    - ["CTNC", "PROXIMIDADE", "CTNC"]
+
+    - ["CTC", "INTRA_TRIANGULO", "PEA"]
+    - ["CTC", "INTRA_TRIANGULO", "ERB"]
+    - ["CTC", "INTRA_TRIANGULO", "CPS"]
+    - ["CTNC", "INTRA_TRIANGULO", "PEA"]
+    - ["CTNC", "INTRA_TRIANGULO", "ERB"]
+    - ["CTNC", "INTRA_TRIANGULO", "CPS"]
+
+force_model:
+  enabled: false
+  num_iterations: 100
+  learning_rate: 0.01
+  decay_rate: 0.99
+
+  connection_forces:
+    k_attractive: 1.0
+    distance_exp: 2
+    min_distance: 0.1
+    gaussian_sigma: 0.5
+
+  non_connection_forces:
+    k_repulsive: 0.5
+    different_operator_factor: 1.0
+    same_operator_factor: 10.0
+    distance_decay: 2
+
+  triangular_forces:
+    k_cohesion: 0.1
+    ideal_area_factor: 1.0
+    area_sigma: 0.3
+
+  mesh_forces:
+    k_repulsion: 0.3
+    k_attraction: 0.2
+    min_distance: 0.5
+    max_distance: 2.0
+
+node_processing:
+  node_id_column: "node_id"
+  node_type_column: "node_type"
+
+  node_types_config:
+    PEA:
+      features: ["pea_x_norm", "pea_y_norm"]
+      coordinate_features: ["pea_x_norm", "pea_y_norm"]
+      additional_features: ["operadora"]
+      embedding_dim: 64
+
+    ERB:
+      features: ["erb_x_norm", "erb_y_norm"]
+      coordinate_features: ["erb_x_norm", "erb_y_norm"]
+      additional_features: ["operadora", "tecnologia"]
+      embedding_dim: 64
+
+    CPS:
+      features: ["cps_x_norm", "cps_y_norm"]
+      coordinate_features: ["cps_x_norm", "cps_y_norm"]
+      additional_features: ["operadora"]
+      embedding_dim: 48
+
+    CTC:
+      features: ["ctc_x_norm", "ctc_y_norm"]
+      coordinate_features: ["ctc_x_norm", "ctc_y_norm"]
+      embedding_dim: 32
+
+    CTNC:
+      features: ["ctnc_x_norm", "ctnc_y_norm"]
+      coordinate_features: ["ctnc_x_norm", "ctnc_y_norm"]
+      embedding_dim: 32
+
+edge_processing:
+  edge_type_column: "edge_type"
+
+  edge_types_config:
+    CONEXAO_PEA_ERB:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "PEA"
+      target_type: "ERB"
+      canonical_name: "CONEXAO"
+      features: []
+      importance_weight: 1.0
+
+    NAO_CONEXAO:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "PEA"
+      target_type: "ERB"
+      canonical_name: "NAO_CONEXAO"
+      features: ["mesma_operadora_norm"]
+      importance_weight: 0.8
+
+    PEA_PEA:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "PEA"
+      target_type: "PEA"
+      canonical_name: "PROXIMIDADE"
+      features: ["distancia_norm"]
+      importance_weight: 0.5
+
+    ERB_ERB:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "ERB"
+      target_type: "ERB"
+      canonical_name: "PROXIMIDADE"
+      features: ["distancia_norm"]
+      importance_weight: 0.5
+
+    CPS_CPS:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "CPS"
+      target_type: "CPS"
+      canonical_name: "PROXIMIDADE"
+      features: ["distancia_norm"]
+      importance_weight: 0.4
+
+    CTC_CTC:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "CTC"
+      target_type: "CTC"
+      canonical_name: "PROXIMIDADE"
+      features: ["distancia_norm"]
+      importance_weight: 0.4
+
+    CTNC_CTNC:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      source_type: "CTNC"
+      target_type: "CTNC"
+      canonical_name: "PROXIMIDADE"
+      features: ["distancia_norm"]
+      importance_weight: 0.4
+
+    INTRA_TRIANGULO_CONEXAO:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      dynamic_typing: true
+      source_type_col: "source_type"
+      target_type_col: "target_type"
+      canonical_name: "INTRA_TRIANGULO"
+      features: []
+      importance_weight: 0.6
+
+    INTRA_TRIANGULO_NAO_CONEXAO:
+      source_id_col: "source_id"
+      target_id_col: "target_id"
+      dynamic_typing: true
+      source_type_col: "source_type"
+      target_type_col: "target_type"
+      canonical_name: "INTRA_TRIANGULO"
+      features: ["fator_punitivo_norm"]
+      importance_weight: 0.5
+
+feature_normalization:
+  enabled: true
+  method: "standard"
+
+add_relative_features: false
+
+preprocessing:
+  handle_missing: "zero"
+  remove_outliers: false
+  outlier_threshold: 3.0
+
+hardware:
+  gpu:
+    enabled: false
+    memory_fraction: 0.8
+    allow_growth: true
+
+  memory_optimization:
+    batch_processing: true
+    batch_size: 50000
+    gc_interval: 5000
+
+  parallelism:
+    enabled: true
+    max_workers: 24
+
+logging:
+  level: "INFO"
+  console: true
+  file: true
+  log_filename: "grafo_construccao_v3.log"
+
+gnn_training_hints:
+  task_type: "node_regression"
+  target_nodes: "PEA"
+  loss_function: "mse"
+
+  suggested_architecture:
+    model: "HeteroGNN"
+    num_layers: 4
+    hidden_dim: 128
+    attention_heads: 8
+    dropout: 0.2
+
+  training_params:
+    epochs: 300
+    learning_rate: 0.001
+    weight_decay: 0.0001
+    early_stopping_patience: 30

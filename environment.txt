@@ -1,0 +1,32 @@
+# RECONSTRUCTED requirements. This list was derived from the import statements of the
+# scripts in this repository; it was not frozen from the environments of the original runs,
+# which were not recorded. Training ran on Google Colab with a CUDA GPU; data preparation
+# ran on a local machine. Pinned versions are those of a Python 3.11 environment in which the
+# training, graph-construction and analysis modules were byte-compiled and imported; they are
+# not claimed to be the versions used in the original runs. Unpinned entries were not tested.
+#
+# core: graph construction, training, analysis
+torch==2.10.0
+torch-geometric==2.8.0
+numpy==2.4.6
+pandas==2.3.3
+scipy==1.17.0
+scikit-learn==1.8.0
+pyyaml==6.0.3
+matplotlib==3.10.8
+seaborn==0.13.2
+psutil==7.2.2
+tqdm==4.67.3
+#
+# data preparation: normalization, enrichment
+geopandas==1.1.4
+shapely==2.1.2
+pyproj==3.7.2
+fiona
+plotly
+colorama
+#
+# optional accelerators, imported inside try/except blocks
+numba==0.67.0
+# cupy-cuda12x
+# cudf (RAPIDS)

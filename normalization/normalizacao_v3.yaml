@@ -1,0 +1,258 @@
+system:
+  use_gpu: true
+  max_workers: 24
+  chunk_size: 10000000
+  memory_limit_gb: 32
+  enable_optimization: true
+
+paths:
+  input_dir: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES"
+
+  output_dir: "${ARPIA_ROOT}/NORMALIZACAO_OUTPUT"
+
+  log_dir: "${ARPIA_ROOT}/NORMALIZACAO/logs"
+
+input:
+  nodes:
+    consolidated:
+      file: "${ARPIA_ROOT}/DATA_ENRICHED/ANTENAS_ERB/erb_cps_ctc_ctnc.csv"
+      required: true
+      types:
+        pea:
+          id_column: "pea_id"
+          lat_column: "pea_lat"
+          lon_column: "pea_lon"
+        erb:
+          id_column: "erb_id"
+          lat_column: "erb_lat"
+          lon_column: "erb_lon"
+        cps:
+          id_column: "cps_id"
+          lat_column: "cps_lat"
+          lon_column: "cps_lon"
+        ctc:
+          id_column: "triangulation_id"
+          lat_column: "centroid_lat"
+          lon_column: "centroid_lon"
+          filter_column: "triangulation_type"
+          filter_value: "CTC"
+        ctnc:
+          id_column: "triangulation_id"
+          lat_column: "centroid_lat"
+          lon_column: "centroid_lon"
+          filter_column: "triangulation_type"
+          filter_value: "CTNC"
+
+  edges:
+    conexao_pea_erb:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_conexao_pea_erb.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: true
+
+    nao_conexao:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_nao_conexao.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: true
+
+    pea_pea:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_pea_pea.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: false
+
+    erb_erb:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_erb_erb.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: false
+
+    cps_cps:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_cps_cps.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: false
+
+    ctc_ctc:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_ctc_ctc.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: false
+
+    ctnc_ctnc:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_ctnc_ctnc.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      required: false
+
+    intra_triangulo_conexao:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_intra_triangulo_conexao.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      add_type_columns: true
+      required: false
+
+    intra_triangulo_nao_conexao:
+      file: "${ARPIA_ROOT}/DATA_PROCESSED/GRAPH_NODES_EDGES/edges_intra_triangulo_nao_conexao.csv"
+      source_column: "source_id"
+      target_column: "target_id"
+      add_type_columns: true
+      required: false
+
+mapping:
+  nodes:
+    - "PEA"
+    - "ERB"
+    - "CPS"
+    - "CTC"
+    - "CTNC"
+
+  edges:
+    - "CONEXAO_PEA_ERB"
+    - "NAO_CONEXAO"
+    - "PEA_PEA"
+    - "ERB_ERB"
+    - "CPS_CPS"
+    - "CTC_CTC"
+    - "CTNC_CTNC"
+    - "INTRA_TRIANGULO_CONEXAO"
+    - "INTRA_TRIANGULO_NAO_CONEXAO"
+
+coordinates:
+  utm_epsg: 32723
+  source_crs: "EPSG:4326"
+  target_crs: "EPSG:32723"
+
+normalization:
+  method: "standard"
+  handle_outliers: false
+  apply_filters: false
+
+  scalers:
+    coordinates: "standard"
+    distances: "standard"
+    angular: "circular"
+    categorical: "label"
+
+  features:
+    min_variance_threshold: 0.0
+    correlation_threshold: 1.0
+    remove_features: false
+
+    pea:
+      normalize: ["pea_x_utm", "pea_y_utm"]
+      categorical: []
+
+    erb:
+      normalize: ["erb_x_utm", "erb_y_utm"]
+      categorical: []
+
+    cps:
+      normalize: ["cps_x_utm", "cps_y_utm"]
+      categorical: []
+
+    ctc:
+      normalize: ["ctc_x_utm", "ctc_y_utm"]
+      categorical: []
+
+    ctnc:
+      normalize: ["ctnc_x_utm", "ctnc_y_utm"]
+      categorical: []
+
+edge_processing:
+  limits:
+    max_edges_per_type: null
+    max_connections_per_node: null
+
+  id_validation:
+    strict_mode: false
+    log_missing_ids: true
+    create_missing_mappings: true
+
+output:
+  separate_by_type: true
+
+  formats:
+    - "parquet"
+    - "csv"
+
+  files:
+    nodes: "nodes_normalized_v3.parquet"
+    edges: "edges_normalized_v3.parquet"
+    metadata: "normalization_metadata_v3.json"
+    scalers: "normalization_scalers_v3.pkl"
+    id_mapping: "id_mapping_v3.json"
+    documentation: "normalization_documentation_v3.md"
+
+validation:
+  enable_validation: true
+
+  checks:
+    data_integrity: true
+    id_consistency: true
+    coordinate_bounds: true
+    feature_distributions: true
+
+    normalization_quality: true
+    scaler_consistency: true
+    outlier_detection: true
+
+    graph_connectivity: true
+    node_edge_consistency: true
+    isolated_nodes: true
+
+documentation:
+  generate_docs: true
+
+  sections:
+    - "dataset_overview"
+    - "normalization_process"
+    - "coordinate_transformations"
+    - "feature_engineering"
+    - "quality_metrics"
+    - "validation_results"
+    - "usage_guidelines"
+
+  output_format: "markdown"
+  include_plots: true
+  include_statistics: true
+
+logging:
+  level: "INFO"
+
+  loggers:
+    - name: "normalizacao_v3"
+      file: "normalizacao_v3.log"
+    - name: "id_mapeamento_v3"
+      file: "id_mapeamento_v3.log"
+    - name: "pipeline_v3"
+      file: "pipeline_v3.log"
+
+  detailed_progress: true
+  memory_monitoring: true
+  performance_metrics: true
+
+eda:
+  generate_eda: true
+  output_dir: "eda_results_v3"
+
+  analyses:
+    - "summary_statistics"
+    - "distribution_analysis"
+    - "correlation_analysis"
+    - "spatial_analysis"
+    - "connectivity_analysis"
+    - "quality_assessment"
+
+  plots:
+    - "feature_distributions"
+    - "spatial_distributions"
+    - "correlation_matrices"
+    - "connectivity_graphs"
+    - "quality_metrics"
+
+  reports:
+    - "html_report"
+    - "json_summary"
+    - "markdown_docs"
